@@ -27,20 +27,8 @@ app.get('/stock_price', (req, res) => {
   let symbol = req.query.symbol;
 
   stockService.getStockPriceFromApi(symbol).then((response) => {
-    res.send(stockService.getPriceFromResponse(response));
+    res.send({ price: stockService.getPriceFromResponse(response) });
   });
-});
-
-app.post('/events', (req, res) => {
-  let to = req.body.To;
-  let fromNumber = req.body.From;
-  let callStatus = req.body.CallStatus;
-  let callSid = req.body.CallSid;
-
-  io.emit('call progress event', { to, fromNumber, callStatus, callSid });
-
-  console.log(to, fromNumber, callStatus, callSid);
-  res.send('Event received');
 });
 
 app.post('/email_prices', (req, res) => {
@@ -51,10 +39,3 @@ app.post('/email_prices', (req, res) => {
     console.log('email success');
   });
 });
-
-// emailService.sendPriceEmail('paul@test.com', [
-//   {symbol: 'AAPL', price: 100},
-//   {symbol: 'GOOG', price: 2121}
-// ]).then(() => {
-//   console.log('email sent');
-// });
