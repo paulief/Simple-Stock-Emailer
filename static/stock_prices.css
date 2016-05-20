@@ -1,0 +1,16 @@
+#stock-price-window {
+	background-color: #f2f2f2;
+	text-align: center;
+}
+
+.pure-g {
+		line-height: 48px;
+		text-align: center;
+		vertical-align: middle;
+		border-bottom: 1px solid #a6a6a6;
+}
+
+.email-input, .submit-btn {
+	margin: 0.5em;
+	padding: 0.5em 1em;
+}

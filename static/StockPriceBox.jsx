@@ -55,9 +55,20 @@ class StockPriceBox extends React.Component {
 		return (
 			<div className="stock-price-box">
 				<h2>Stock Prices</h2>
-				{stockPrices}
-				<input type="text" placeholder="Your Email" onChange={this.emailInputChanged.bind(this)} value={this.state.email}/>
-				<button type="button" onClick={this.sendPriceEmail.bind(this)}>Send Prices</button>
+				<div className="pure-g">
+					<div className="pure-u-1-2 column-header">Stock Ticker</div>
+					<div className="pure-u-1-2 column-header">Price</div>
+				</div>
+				<div className="stock-prices">
+					{stockPrices}
+				</div>
+				<div className="pure-g email-prices-input">
+					<div className="pure-u-1-1">
+						<input className="email-input" type="text" placeholder="Your Email" onChange={this.emailInputChanged.bind(this)} value={this.state.email}/>
+						<button className="pure-button pure-button-primary submit-btn" type="button" onClick={this.sendPriceEmail.bind(this)}>Send Prices</button>
+						<div>{this.state.emailStatusMessage}</div>
+					</div>
+				</div>
 			</div>
 		)
 	}
@@ -66,4 +77,4 @@ class StockPriceBox extends React.Component {
 export default StockPriceBox;
 
 // More tickers can easily be added here, or through additional functionality
-ReactDOM.render(<StockPriceBox stockTickers={["AAPL","GOOG", "ACN"]} />, document.getElementById('stock-prices'));
+ReactDOM.render(<StockPriceBox stockTickers={["AAPL","GOOG"]} />, document.getElementById('stock-price-window'));

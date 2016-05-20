@@ -96,16 +96,20 @@
 
 			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(StockPriceBox).call(this));
 
-			_this.state = { email: '', stockPrices: {} };
+			_this.state = {
+				email: '',
+				stockPrices: {},
+				emailStatusMessage: ''
+			};
 
-			// every second, get all stock prices and update them
-			setTimeout(function () {
+			// every two seconds, get all stock prices and update them
+			setInterval(function () {
 				_this.props.stockTickers.map(function (stockTicker) {
-					_stockService2.default.getStockPrice(stockTicker).then(function (price) {
-						_this.updatePrice(stockTicker, price);
+					_stockService2.default.getStockPrice(stockTicker).then(function (priceResponse) {
+						_this.updatePrice(stockTicker, priceResponse.price);
 					});
 				});
-			}, 1000);
+			}, 2000);
 			return _this;
 		}
 
@@ -119,7 +123,12 @@
 		}, {
 			key: 'sendPriceEmail',
 			value: function sendPriceEmail() {
-				_stockService2.default.sendStockPrices(this.state.email, this.state.stockPrices);
+				var _this2 = this;
+
+				_stockService2.default.sendStockPrices(this.state.email, this.state.stockPrices).then(function (response) {
+					var statusMessage = response.code === 200 ? 'Success!' : 'Invalid Email';
+					_this2.setState({ emailStatusMessage: statusMessage });
+				});
 			}
 		}, {
 			key: 'emailInputChanged',
@@ -129,14 +138,14 @@
 		}, {
 			key: 'render',
 			value: function render() {
-				var _this2 = this;
+				var _this3 = this;
 
 				var stockPrices = this.props.stockTickers.map(function (stockTicker) {
 					var props = {
 						key: stockTicker,
 						stockTicker: stockTicker,
-						stockPrice: _this2.state.stockPrices[stockTicker],
-						onPriceUpdate: _this2.updatePrice.bind(_this2)
+						stockPrice: _this3.state.stockPrices[stockTicker],
+						onPriceUpdate: _this3.updatePrice.bind(_this3)
 					};
 
 					return _react2.default.createElement(_StockPrice2.default, props);
@@ -150,12 +159,43 @@
 						null,
 						'Stock Prices'
 					),
-					stockPrices,
-					_react2.default.createElement('input', { type: 'text', placeholder: 'Your Email', onChange: this.emailInputChanged.bind(this), value: this.state.email }),
 					_react2.default.createElement(
-						'button',
-						{ type: 'button', onClick: this.sendPriceEmail.bind(this) },
-						'Send Prices'
+						'div',
+						{ className: 'pure-g' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'pure-u-1-2 column-header' },
+							'Stock Ticker'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'pure-u-1-2 column-header' },
+							'Price'
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'stock-prices' },
+						stockPrices
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'pure-g email-prices-input' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'pure-u-1-1' },
+							_react2.default.createElement('input', { className: 'email-input', type: 'text', placeholder: 'Your Email', onChange: this.emailInputChanged.bind(this), value: this.state.email }),
+							_react2.default.createElement(
+								'button',
+								{ className: 'pure-button pure-button-primary submit-btn', type: 'button', onClick: this.sendPriceEmail.bind(this) },
+								'Send Prices'
+							),
+							_react2.default.createElement(
+								'div',
+								null,
+								this.state.emailStatusMessage
+							)
+						)
 					)
 				);
 			}
@@ -168,7 +208,7 @@
 
 	// More tickers can easily be added here, or through additional functionality
 
-	_reactDom2.default.render(_react2.default.createElement(StockPriceBox, { stockTickers: ["AAPL", "GOOG", "ACN"] }), document.getElementById('stock-prices'));
+	_reactDom2.default.render(_react2.default.createElement(StockPriceBox, { stockTickers: ["AAPL", "GOOG"] }), document.getElementById('stock-price-window'));
 
 /***/ },
 /* 2 */
@@ -19812,17 +19852,15 @@
 	    value: function render() {
 	      return _react2.default.createElement(
 	        "div",
-	        { className: "stock-price-container" },
+	        { className: "stock-price-container pure-g" },
 	        _react2.default.createElement(
-	          "h3",
-	          null,
-	          "Stock Ticker: ",
+	          "div",
+	          { className: "pure-u-1-2 stock-ticker" },
 	          this.props.stockTicker
 	        ),
 	        _react2.default.createElement(
-	          "h4",
-	          { className: "stock-price" },
-	          "Stock Price: ",
+	          "div",
+	          { className: "pure-u-1-2 stock-price" },
 	          this.props.stockPrice
 	        )
 	      );
@@ -19865,10 +19903,11 @@
 			return httpService.get(url);
 		},
 		getPriceFromResponse: function getPriceFromResponse(response) {
-			return response.list.resources[0].resource.fields.price;
+			var price = parseFloat(response.list.resources[0].resource.fields.price);
+			return '$ ' + price.toFixed(2);
 		},
 		sendStockPrices: function sendStockPrices(email, prices) {
-			httpService.post('/email_prices', {
+			return httpService.post('/email_prices', {
 				email: email,
 				prices: prices
 			});
@@ -19915,7 +19954,6 @@
 		});
 
 		if (body) {
-			console.log('writing to body', body);
 			req.write(body);
 		}
 
