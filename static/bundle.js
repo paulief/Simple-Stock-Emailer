@@ -19929,12 +19929,6 @@
 	var q = __webpack_require__(167);
 	var http = __webpack_require__(169);
 
-	var path = 'http://finance.yahoo.com/webservice/v1/symbols/';
-
-	function buildUrl(symbol) {
-		return encodeURI('' + path + symbol + '/quote?format=json');
-	}
-
 	function request(options, body) {
 		var deferred = q.defer();
 		var result = '';
