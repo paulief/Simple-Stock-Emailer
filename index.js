@@ -35,7 +35,12 @@ app.post('/email_prices', (req, res) => {
   let email = req.body.email;
   let prices = req.body.prices;
 
-  emailService.sendPriceEmail(email, prices).then(() => {
-    console.log('email success');
-  });
+  if (emailService.isValidEmail(email)) {
+    emailService.sendPriceEmail(email, prices).then(() => {
+      res.send({ code: 200 });
+    });
+  } else {
+    // non valid email
+    res.send({ code: 400 });
+  }
 });

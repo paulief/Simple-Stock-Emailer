@@ -7,16 +7,20 @@ class StockPriceBox extends React.Component {
 
 	constructor() {
 		super();
-		this.state = {email: '', stockPrices: {}};
+		this.state = {
+			email: '',
+			stockPrices: {},
+			emailStatusMessage: ''
+		};
 
-		// every second, get all stock prices and update them
+		// every two seconds, get all stock prices and update them
 		setInterval(() => {
 			this.props.stockTickers.map((stockTicker) => {
-				stockService.getStockPrice(stockTicker).then((price) => {
-	        this.updatePrice(stockTicker, price);
+				stockService.getStockPrice(stockTicker).then((priceResponse) => {
+	        this.updatePrice(stockTicker, priceResponse.price);
 	      });
 			})
-    }, 1000);
+    }, 2000);
 	}
 
 	updatePrice(stockTicker, price) {
@@ -26,7 +30,10 @@ class StockPriceBox extends React.Component {
 	}
 
 	sendPriceEmail() {
-		stockService.sendStockPrices(this.state.email, this.state.stockPrices);
+		stockService.sendStockPrices(this.state.email, this.state.stockPrices).then((response) => {
+			let statusMessage = response.code === 200 ? 'Success!' : 'Invalid Email';
+			this.setState({emailStatusMessage: statusMessage});
+		});
 	}
 
 	emailInputChanged(event) {
